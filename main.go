@@ -74,9 +74,6 @@ func main() {
 		if err != nil {
 			log.Panic(err.Error())
 		}
-		defer func() {
-			_ = phpConn.Close()
-		}()
 
 		color.Set(color.FgHiGreen)
 		fmt.Println("- Received incoming connection from PHP")
@@ -88,9 +85,6 @@ func main() {
 		if err != nil {
 			log.Panic(err.Error())
 		}
-		defer func() {
-			_ = ideConn.Close()
-		}()
 
 		handleProxy(phpConn, ideConn)
 
@@ -102,8 +96,12 @@ func handleProxy(phpConn net.Conn, ideConn net.Conn) {
 	phpChan := chanFromConn(phpConn)
 	ideChan := chanFromConn(ideConn)
 
-	defer ideConn.Close()
-	defer phpConn.Close()
+	defer func() {
+		_ = ideConn.Close()
+	}()
+	defer func() {
+		_ = phpConn.Close()
+	}()
 
 	for {
 		select {
@@ -113,7 +111,7 @@ func handleProxy(phpConn net.Conn, ideConn net.Conn) {
 				fmt.Println("! PHP connection closed")
 				return
 			} else {
-				fmt.Println("> php: ", color.HiBlueString(string(b1)))
+				fmt.Println("> ide: ", color.HiBlueString(string(b1)))
 				_, err := ideConn.Write(b1)
 				if err != nil {
 					color.Set(color.FgHiRed)
@@ -148,7 +146,7 @@ func displayLogo() {
 		"                 |___/|_|              |___/\n"
 
 	color.Set(color.FgHiCyan)
-	fmt.Println(logo)
+	fmt.Print(logo)
 
 	color.Set(color.FgHiGreen)
 	fmt.Println("+ Starting XdbgPrxy " + version + " - Joshua Thijssen (https://github.com/jaytaph)")
