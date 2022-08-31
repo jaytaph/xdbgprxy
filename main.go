@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	flag "github.com/spf13/pflag"
@@ -111,7 +113,11 @@ func handleProxy(phpConn net.Conn, ideConn net.Conn) {
 				fmt.Println("! PHP connection closed")
 				return
 			} else {
-				fmt.Println("> ide: ", color.HiBlueString(string(b1)))
+				if config.verbose {
+					fmt.Println("> ide: ", color.HiBlueString(string(b1)))
+				} else {
+					fmt.Printf("> ide: received %d characters\n", len(string(b1)))
+				}
 				_, err := ideConn.Write(b1)
 				if err != nil {
 					color.Set(color.FgHiRed)
@@ -124,7 +130,11 @@ func handleProxy(phpConn net.Conn, ideConn net.Conn) {
 				fmt.Println("! IDE connection closed")
 				return
 			} else {
-				fmt.Println("> php: ", color.HiRedString(string(b2)))
+				// Convert \0 to \n, as there can be multiple commands
+				s := string(bytes.Replace(b2, []byte{0}, []byte{'\n'}, -1))
+				s = strings.Trim(s, "\n")
+
+				fmt.Println("> php: ", color.HiRedString(s))
 				_, err := phpConn.Write(b2)
 				if err != nil {
 					color.Set(color.FgHiRed)
