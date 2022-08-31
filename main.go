@@ -157,7 +157,7 @@ func parseFlags() {
 	flag.IntVar(&config.idePort, "ide-port", 9003, "Port to your IDE")
 	flag.StringVar(&config.listenHost, "listen-host", "127.0.0.1", "IP to listen on")
 	flag.IntVar(&config.listenPort, "listen-port", 9003, "Port to listen on")
-	flag.BoolVar(&config.verbose, "verbose", true, "Verbose output")
+	flag.BoolVar(&config.verbose, "verbose", false, "Verbose output")
 	flag.BoolVar(&config.nocolor, "no-color", false, "No ANSI color output")
 
 	flag.Parse()
